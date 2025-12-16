@@ -1,102 +1,173 @@
-1️⃣ SSH into your Azure VM
-ssh azureuser@{publicip}
+# 🚀 Deploying a Golang Application on an Azure VM
 
-2️⃣ Install Go on the VM
+This guide walks through deploying a simple Golang web application on an Azure Virtual Machine. It’s written to be beginner-friendly while still following good DevOps practices.
 
-Check if Go is already there:
+---
 
+## 🧩 Prerequisites
+
+* An Azure account
+* An Azure VM (Ubuntu recommended) with a **public IP**
+* SSH access to the VM
+* Your Golang project hosted on GitHub
+
+---
+
+## 1️⃣ Connect to Your Azure VM
+
+From your local terminal, connect to the VM using SSH:
+
+```bash
+ssh azureuser@<public-ip>
+```
+
+Once connected, you are inside the Azure VM.
+
+---
+
+## 2️⃣ Install Golang on the VM
+
+### Check if Go is already installed
+
+```bash
 go version
+```
 
+### Install Go (if not present)
 
-If not installed:
-
+```bash
 sudo apt update
 sudo apt install -y golang-go
+```
 
+### Verify installation
 
-Verify:
-
+```bash
 go version
+```
 
-3️⃣ Clone your Golang project
+---
+
+## 3️⃣ Clone Your Golang Project
+
+Clone the GitHub repository containing your Golang application:
+
+```bash
 git clone https://github.com/Prathyu-123/devops-web-app.git
 cd devops-web-app
+```
 
+Verify the project structure:
 
-Check files:
-
+```bash
 ls
+```
 
+You should see key files such as:
 
-Look for:
+* `main.go`
+* `go.mod`
 
-main.go
+---
 
-go.mod
+## 4️⃣ Run the Golang Application
 
-4️⃣ Run the Golang app
+### Download dependencies
 
-First download dependencies:
-
+```bash
 go mod tidy
+```
 
+### Start the application
 
-Run:
-
+```bash
 go run main.go
+```
 
+If successful, you will see output similar to:
 
-If successful, you’ll see something like:
+```
+Server running on http://0.0.0.0:8080
+```
 
-Server started on port 8080
+📌 **Note the port number (8080)** — this is critical for networking configuration.
 
+---
 
-⚠️ Note the port number (very important).
+## 5️⃣ Allow Application Port in Azure (CRITICAL)
 
-5️⃣ Allow the app port in Azure (CRITICAL 🔥)
+By default, Azure blocks inbound traffic. You must explicitly allow your app port.
 
-Suppose your app runs on 8080.
+### Steps in Azure Portal
 
-Azure Portal →
+1. Go to **Azure Portal → Virtual Machines**
+2. Select your VM
+3. Navigate to **Networking**
+4. Add an **Inbound port rule**:
 
-VM → Networking
+   * **Port**: `8080`
+   * **Protocol**: `TCP`
+   * **Action**: `Allow`
 
-Add inbound rule
+Without this step, the application will run but won’t be accessible from the browser.
 
-Port: 8080
+---
 
-Protocol: TCP
+## 6️⃣ Access the Application from Browser 🌍
 
-Action: Allow
+Open a browser on your local machine and visit:
 
-Without this, browser won’t open even if Go app is running.
+```
+http://<public-ip>:8080
+```
 
-6️⃣ Access your app in browser 🌍
+If the page loads correctly:
 
-Open:
+🎉 **Congratulations! Your Golang application is live on Azure VM.**
 
-http://{publicip}:8080
+---
 
+## 7️⃣ Run the Application in Background
 
-If you see your web page → 🎉 YOU DEPLOYED A GO APP ON AZURE VM
+If you close the SSH session, the app will stop unless it runs in the background.
 
-7️⃣ Run app in background (important)
+### Use `nohup` to keep it running
 
-If you close SSH, the app will stop.
-Use nohup:
-
+```bash
 nohup go run main.go > app.log 2>&1 &
+```
 
+### Verify the process
 
-Check:
-
+```bash
 ps aux | grep go
+```
 
+### View logs
 
-Logs:
-
+```bash
 cat app.log
+```
 
-⭐ Better: Build binary (production style)
+---
 
-yayyy!!!!, application is running
+## ⭐ Production-Style Improvement: Build a Binary
+
+Instead of `go run`, build and execute a binary for better performance:
+
+```bash
+go build -o webapp
+nohup ./webapp > app.log 2>&1 &
+```
+
+This approach is faster, cleaner, and closer to real-world production setups.
+
+---
+
+## ✅ Final Outcome
+
+* Golang app successfully deployed on Azure VM
+* Application accessible via public IP
+* App running persistently in the background
+
+✨ **Yayyy! Your application is running successfully.**
